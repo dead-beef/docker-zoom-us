@@ -6,6 +6,8 @@ USER_GID=${USER_GID:-1000}
 
 ZOOM_US_USER=zoom
 
+echo "entrypoint"
+
 install_zoom_us() {
   echo "Installing zoom-us-wrapper..."
   install -m 0755 /var/cache/zoom-us/zoom-us-wrapper /target/
@@ -21,6 +23,7 @@ uninstall_zoom_us() {
 }
 
 create_user() {
+  echo "create_user"
   # create group with USER_GID
   if ! getent group ${ZOOM_US_USER} >/dev/null; then
     groupadd -f -g ${USER_GID} ${ZOOM_US_USER} >/dev/null 2>&1
@@ -35,18 +38,21 @@ create_user() {
   adduser ${ZOOM_US_USER} sudo
 }
 
-grant_access_to_video_devices() {
-  for device in /dev/video*
+grant_access_to_input_devices() {
+  echo "grant_access_to_input_devices"
+  for device in /dev/video* /dev/audio* /dev/dsp* /dev/snd/*
   do
+    echo "found device $device"
     if [[ -c $device ]]; then
-      VIDEO_GID=$(stat -c %g $device)
-      VIDEO_GROUP=$(stat -c %G $device)
-      if [[ ${VIDEO_GROUP} == "UNKNOWN" ]]; then
-        VIDEO_GROUP=zoomusvideo
-        groupadd -g ${VIDEO_GID} ${VIDEO_GROUP}
+      DEV_GID=$(stat -c %g $device)
+      DEV_GROUP=$(stat -c %G $device)
+      if [[ ${DEV_GROUP} == "UNKNOWN" ]]; then
+        DEV_GROUP=zoomusvideo
+        echo "add group '${DEV_GROUP}'"
+        groupadd -g ${DEV_GID} ${DEV_GROUP}
       fi
-      usermod -a -G ${VIDEO_GROUP} ${ZOOM_US_USER}
-      break
+      echo "add user to group '${DEV_GROUP}'"
+      usermod -a -G ${DEV_GROUP} ${ZOOM_US_USER}
     fi
   done
 }
@@ -65,7 +71,7 @@ case "$1" in
     ;;
   zoom)
     create_user
-    grant_access_to_video_devices
+    grant_access_to_input_devices
     echo "$1"
     launch_zoom_us $@
     ;;
