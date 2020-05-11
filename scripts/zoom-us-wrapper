@@ -12,6 +12,8 @@ USER_GID=$(id -g)
 XSOCK=/tmp/.X11-unix
 XAUTH=/tmp/.docker.xauth
 
+IMAGE=zoom
+
 DOWNLOAD_DIR=$(xdg-user-dir DOWNLOAD)
 if [ -z "${DOWNLOAD_DIR}" ]; then
     DOWNLOAD_DIR="${HOME}/Downloads"
@@ -31,7 +33,7 @@ cleanup_stopped_zoom_us_instances(){
   for c in $(${SUDO} docker ps -a -q)
   do
     image="$(${SUDO} docker inspect -f {{.Config.Image}} ${c})"
-    if [ "${image}" == "mdouchement/zoom-us:latest" ]; then
+    if [ "${image}" == "$IMAGE" ]; then
       running=$(${SUDO} docker inspect -f {{.State.Running}} ${c})
       if [ "${running}" != "true" ]; then
         ${SUDO} docker rm "${c}" >/dev/null
@@ -109,4 +111,4 @@ ${SUDO} docker run -d \
   ${VOLUMES} \
   ${ZOOM_EXTRA_DOCKER_ARGUMENTS} \
   --name zoomus \
-  mdouchement/zoom-us:latest ${prog} $@ >/dev/null
+  ${IMAGE} ${prog} $@
