@@ -19,24 +19,8 @@ If you find this image useful here's how you can help:
 
 ## Installation
 
-Automated builds of the image are available on [Dockerhub](https://hub.docker.com/r/mdouchement/zoom-us) and is the recommended method of installation.
-
 ```bash
-docker pull mdouchement/zoom-us:latest
-```
-
-Alternatively you can build the image yourself.
-
-```bash
-docker build -t mdouchement/zoom-us github.com/mdouchement/docker-zoom-us
-```
-
-With the image locally available, install the wrapper scripts by running the following as root:
-
-```bash
-docker run -it --rm \
-  --volume /usr/local/bin:/target \
-  mdouchement/zoom-us:latest install
+./build.sh
 ```
 
 This will install a wrapper script to launch `zoom`.
@@ -73,19 +57,9 @@ This makes sure that your profile details are stored on the host and files recei
 
 To upgrade to newer releases:
 
-  1. Download the updated Docker image:
-
-  ```bash
-  docker pull mdouchement/zoom-us:latest
-  ```
-
-  2. Run `install` to make sure the host scripts are updated.
-
-  ```bash
-  docker run -it --rm \
-    --volume /usr/local/bin:/target \
-    mdouchement/zoom-us:latest install
-  ```
+```bash
+./build.sh
+```
 
 ## Uninstallation
 
